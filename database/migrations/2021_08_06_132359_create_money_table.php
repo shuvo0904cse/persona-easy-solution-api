@@ -17,7 +17,7 @@ class CreateMoneyTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->unsigned()->index();
             $table->integer('category_id')->unsigned()->index();
-            $table->double('amount', 15, 8)->nullable();
+            $table->double('amount', 15, 2)->nullable();
             $table->string('title')->nullable();
             $table->string('note')->nullable();
             $table->integer('created_by')->unsigned()->nullable();
@@ -28,11 +28,11 @@ class CreateMoneyTable extends Migration
         });
 
         Schema::table('money', function($table) {
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+           /*  $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade'); */
         });
     }
 

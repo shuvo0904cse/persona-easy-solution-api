@@ -31,9 +31,9 @@ $router->group(['prefix' => 'api'], function () use ($router){
         $router->delete('delete-category/{id}', 'CategoryController@delete');
 
         //Money
-        $router->get('/money', 'MoneyController@index');
-        $router->post('/store-money', 'MoneyController@store');
-        $router->put('/update-money/{id}', 'MoneyController@update');
-        $router->delete('/delete-money/{id}', 'MoneyController@delete');
+        $router->get('money', 'MoneyController@money');
+        $router->post('store-money', 'MoneyController@store');
+        $router->put('update-money/{id}', 'MoneyController@update');
+        $router->delete('delete-money/{id}', 'MoneyController@delete');
     // /});
 });

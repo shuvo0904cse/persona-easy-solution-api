@@ -66,7 +66,7 @@ class CategoryController extends Controller
             ];
             $category = $this->categoryModel()->storeData( $categoryArray);
 
-            return $this->message::successMessage(config("messages")["save_message"], $category);
+            return $this->message::successMessage(config("message.save_message"), $category);
         } catch (\Exception $e) {
             $this->log::error("storeCategory", $e);
             return $this->message::errorMessage();
@@ -76,9 +76,9 @@ class CategoryController extends Controller
     /**
      * Update
      */
-    public function update(Request $request, $categoryId){
+    public function update(Request $request, $id){
          //category details
-         $category = $this->categoryModel()->details($categoryId);
+         $category = $this->categoryModel()->details($id);
 
          //if category not exists
          if(empty($category)) return $this->message::errorMessage("Category ". config("message.not_exit"));
@@ -90,9 +90,12 @@ class CategoryController extends Controller
                 "icon"                      => $request['icon'],
                 "type"                      => $request['type']
             ];
-            $category = $this->categoryModel()->updateData( $categoryArray, $category->id );
+            $this->categoryModel()->updateData( $categoryArray, $category->id );
 
-            return $this->message::successMessage(config("messages")["update_message"], $category);
+             //category details
+            $category = $this->categoryModel()->details($id);
+
+            return $this->message::successMessage(config("message.update_message"), $category);
         } catch (\Exception $e) {
             $this->log::error("updateDoor", $e);
             return $this->message::errorMessage();
@@ -112,7 +115,7 @@ class CategoryController extends Controller
         try{
             //delete Data
             $this->categoryModel()->deleteData( $id );
-            return $this->message::successMessage(config("messages")["delete_message"]);
+            return $this->message::successMessage(config("message.delete_message"));
         } catch (\Exception $e) {
             $this->Log::error("deleteCategory", $e);
             return $this->message::errorMessage();
