@@ -5,6 +5,7 @@ namespace App\Helpers;
 
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 
@@ -79,6 +80,18 @@ class MessageHelper
             'message'   => empty($message) ? config("message.executed_successfully") : $message,
             'results'   => $results,
             'timestamp' => Carbon::now()->toDateTimeString(),
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Login Message
+     */
+    public static function loginMessage($token)
+    {
+        return new JsonResponse([
+            'token'         => $token,
+            'token_type'    => 'bearer',
+            'expires_in'    => Auth::factory()->getTTL() * 60
         ], Response::HTTP_OK);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Helpers\LogHelper;
 use App\Helpers\MessageHelper;
+use App\Helpers\UtilsHelper;
+use App\Http\Resources\CategoryListResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -22,9 +24,20 @@ class CategoryController extends Controller
      /**
      * index
      */
-    public function category()
+    public function category(Request $request)
     {
-        return "OK";
+        try{
+            $lists = $this->categoryModel()->lists(true, $request->limit, $request->search);
+
+            $array = [
+                "data"      => CategoryListResource::collection($lists->items()),
+                "paginate"  => UtilsHelper::getPaginate($lists)
+            ];
+            return $this->message::successMessage("", $array);
+        } catch (\Exception $e) {
+            $this->log::error("lists-category", $e);
+            return $this->message::errorMessage();
+        }
     }
 
     /**
@@ -40,10 +53,9 @@ class CategoryController extends Controller
 
             return $this->message::successMessage("", $category);
         } catch (\Exception $e) {
-            $this->log::error("storeCategory", $e);
+            $this->log::error("details-category", $e);
             return $this->message::errorMessage();
         }
-
     }
 
     /**
@@ -51,7 +63,7 @@ class CategoryController extends Controller
      */
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
+            'name' => 'required|string|unique:categories,name',
             'type' => 'required|in:INCOME,EXPENSE'
         ]);
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
@@ -68,7 +80,7 @@ class CategoryController extends Controller
 
             return $this->message::successMessage(config("message.save_message"), $category);
         } catch (\Exception $e) {
-            $this->log::error("storeCategory", $e);
+            $this->log::error("store-category", $e);
             return $this->message::errorMessage();
         }
     }
@@ -77,6 +89,12 @@ class CategoryController extends Controller
      * Update
      */
     public function update(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|unique:categories,name',
+            'type' => 'required|in:INCOME,EXPENSE'
+        ]);
+        if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
+
          //category details
          $category = $this->categoryModel()->details($id);
 
@@ -97,7 +115,7 @@ class CategoryController extends Controller
 
             return $this->message::successMessage(config("message.update_message"), $category);
         } catch (\Exception $e) {
-            $this->log::error("updateDoor", $e);
+            $this->log::error("update-category", $e);
             return $this->message::errorMessage();
         }
     }
@@ -117,7 +135,7 @@ class CategoryController extends Controller
             $this->categoryModel()->deleteData( $id );
             return $this->message::successMessage(config("message.delete_message"));
         } catch (\Exception $e) {
-            $this->Log::error("deleteCategory", $e);
+            $this->Log::error("delete-category", $e);
             return $this->message::errorMessage();
         }
     }

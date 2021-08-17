@@ -20,6 +20,20 @@ trait BaseModel
     }
 
     /**
+     * lists
+     */
+    public function lists($isPaginate = true, $limit = 20)
+    {
+        $query = self::query();
+
+        //if paginate
+        if($isPaginate) return $query->paginate($limit);
+
+        //if not paginate
+        return $query->get();
+    }
+
+    /**
      * Details
      */
     public function details($columnValue, $columnName = "id", $withTrashed = false)

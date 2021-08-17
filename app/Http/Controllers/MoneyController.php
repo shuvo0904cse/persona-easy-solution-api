@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Helpers\LogHelper;
 use App\Helpers\MessageHelper;
+use App\Helpers\UtilsHelper;
+use App\Http\Resources\MoneyListResource;
 use App\Models\Money;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -22,9 +24,20 @@ class MoneyController extends Controller
      /**
      * index
      */
-    public function money()
+    public function money(Request $request)
     {
-        return "OK";
+        try{
+            $lists = $this->moneyModel()->lists(true, $request->limit, $request->search);
+
+            $array = [
+                "data"      => MoneyListResource::collection($lists->items()),
+                "paginate"  => UtilsHelper::getPaginate($lists)
+            ];
+            return $this->message::successMessage("", $array);
+        } catch (\Exception $e) {
+            $this->log::error("details-category", $e);
+            return $this->message::errorMessage();
+        }
     }
 
     /**
@@ -35,15 +48,14 @@ class MoneyController extends Controller
             //money details
             $money = $this->moneyModel()->details($id);
 
-            //if category not exists
+            //if money not exists
             if(empty($money)) return $this->message::errorMessage("Money ". config("message.not_exit"));
 
             return $this->message::successMessage("", $money);
         } catch (\Exception $e) {
-            $this->log::error("details", $e);
+            $this->log::error("details-money", $e);
             return $this->message::errorMessage();
         }
-
     }
 
     /**
@@ -70,7 +82,7 @@ class MoneyController extends Controller
 
             return $this->message::successMessage(config("message.save_message"), $money);
         } catch (\Exception $e) {
-            $this->log::error("store", $e);
+            $this->log::error("store-money", $e);
             return $this->message::errorMessage();
         }
     }
@@ -79,6 +91,13 @@ class MoneyController extends Controller
      * Update
      */
     public function update(Request $request, $id){
+        $validator = Validator::make($request->all(), [
+            'category_id' => 'required|int',
+            'amount' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'title' => 'required|string'
+        ]);
+        if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
+
          //money details
          $money = $this->moneyModel()->details($id);
 
@@ -101,7 +120,7 @@ class MoneyController extends Controller
 
             return $this->message::successMessage(config("message.update_message"), $money);
         } catch (\Exception $e) {
-            $this->log::error("update", $e);
+            $this->log::error("update-money", $e);
             return $this->message::errorMessage();
         }
     }
@@ -121,7 +140,7 @@ class MoneyController extends Controller
             $this->moneyModel()->deleteData( $id );
             return $this->message::successMessage(config("message.delete_message"));
         } catch (\Exception $e) {
-            $this->Log::error("delete", $e);
+            $this->Log::error("delete-money", $e);
             return $this->message::errorMessage();
         }
     }
