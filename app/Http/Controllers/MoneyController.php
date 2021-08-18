@@ -6,7 +6,7 @@ use App\Helpers\LogHelper;
 use App\Helpers\MessageHelper;
 use App\Helpers\UtilsHelper;
 use App\Http\Resources\MoneyListResource;
-use App\Models\Money;
+use App\Models\MoneyModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -27,8 +27,21 @@ class MoneyController extends Controller
     public function money(Request $request)
     {
         try{
-            $lists = $this->moneyModel()->lists(true, $request->limit, $request->search);
-
+             //filter
+             $filterArray = [
+                "is_pagination" => true,
+                "limit"         => $request->limit,
+                "search"        => [
+                    "fields"    => ['id', 'amount', 'title', 'note', 'categories' => ['id', 'name']],
+                    "value"     => $request->search
+                ],
+                "filter"        => [
+                    ['fields' => ['categories' => 'type'], 'filter' => $request->type],
+                ]
+            ];
+            
+            $lists = $this->moneyModel()->lists($filterArray);
+            dd($lists);
             $array = [
                 "data"      => MoneyListResource::collection($lists->items()),
                 "paginate"  => UtilsHelper::getPaginate($lists)
@@ -63,16 +76,15 @@ class MoneyController extends Controller
      */
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
-            'category_id' => 'required|int',
-            'amount' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'title' => 'required|string'
-        ]);
+            'category_id'   => 'required',
+            'amount'        => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'title'         => 'required|string'
+        ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
         try{
             //store data
             $moneyArray = [
-                "user_id"             => 1,
                 "category_id"         => $request['category_id'],
                 "amount"              => $request['amount'],
                 "title"               => $request['title'],
@@ -92,10 +104,10 @@ class MoneyController extends Controller
      */
     public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'category_id' => 'required|int',
-            'amount' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'title' => 'required|string'
-        ]);
+            'category_id'   => 'required',
+            'amount'        => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'title'         => 'required|string'
+        ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
          //money details
@@ -107,7 +119,6 @@ class MoneyController extends Controller
         try{
             //update data
             $moneyArray = [
-                "user_id"             => 1,
                 "category_id"         => $request['category_id'],
                 "amount"              => $request['amount'],
                 "title"               => $request['title'],
@@ -149,6 +160,6 @@ class MoneyController extends Controller
      * category Model
      */
     private function moneyModel(){
-        return new Money();
+        return new MoneyModel();
     }
 }

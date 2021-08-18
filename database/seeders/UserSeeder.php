@@ -18,14 +18,12 @@ class UserSeeder extends Seeder
     {
         $arrays = [
             [
-                "first_name" => "Developer",
-                "last_name" => "Test",
+                "name" => "Developer",
                 "email" => "developer@gmail.com",
-                "password" => Hash::make("123456")
+                "password" => Hash::make("123456"),
             ],
             [
-                "first_name" => "Admin",
-                "last_name" => "Admin",
+                "name" => "Admin",
                 "email" => "admin@gmail.com",
                 "password" => Hash::make("123456")
             ]
@@ -33,8 +31,7 @@ class UserSeeder extends Seeder
 
         foreach ($arrays as $array){
             $array = [
-                "first_name"    => $array['first_name'],
-                "last_name"     => $array['last_name'],
+                "name"          => $array['name'],
                 "email"         => $array['email'],
                 "password"      => $array['password'],
                 "email_verified_at" => Carbon::now(),

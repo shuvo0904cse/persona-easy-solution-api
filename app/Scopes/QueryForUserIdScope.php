@@ -3,8 +3,6 @@
 
 namespace App\Scopes;
 
-
-use App\Helpers\UtilsHelper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -19,8 +17,7 @@ class QueryForUserIdScope implements Scope
     public function apply(Builder $builder, Model $model)
     {
         $columnName = $model->getTable().".user_id";
-
-        if (Schema::hasColumn($columnName, 'user_id')){
+        if (Schema::hasColumn($model->getTable(), 'user_id')){
             $builder->where($columnName, Auth::user()->id);
         }
     }

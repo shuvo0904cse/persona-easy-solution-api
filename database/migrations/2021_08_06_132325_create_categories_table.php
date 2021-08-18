@@ -14,23 +14,23 @@ class CreateCategoriesTable extends Migration
     public function up()
     {
         Schema::create('categories', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('user_id')->unsigned()->index();
+            $table->uuid('id')->primary();
+            $table->uuid('user_id')->index();
             $table->string('name')->index();
             $table->string('icon')->nullable();
             $table->enum('type', ["INCOME", "EXPENSE"]);
-            $table->integer('created_by')->unsigned()->nullable();
-            $table->integer('updated_by')->unsigned()->nullable();
-            $table->integer('deleted_by')->unsigned()->nullable();
+            $table->uuid('created_by')->nullable();
+            $table->uuid('updated_by')->nullable();
+            $table->uuid('deleted_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
 
         Schema::table('categories', function($table) {
-           /*  $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade'); */
+            $table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

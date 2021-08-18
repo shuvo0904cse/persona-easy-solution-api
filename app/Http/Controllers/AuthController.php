@@ -52,7 +52,7 @@ class AuthController extends Controller
     public function register(Request $request){
 
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string',
+            'name' => 'required|string',
             'email' => 'required|unique:users',
             'phone_number'  => 'required|string',
             'password' => 'required|min:5|max:8'
@@ -62,8 +62,7 @@ class AuthController extends Controller
         try{
             //store data
             $userArray = [
-                "first_name"    => $request['first_name'],
-                "last_name"     => isset($request['last_name']) ? $request['last_name'] : null,
+                "name"    => $request['first_name'],
                 "email"         => $request['email'],
                 "phone_number"  => isset($request['phone_number']) ? $request['phone_number'] : null,
                 "password"      => Hash::make($request['password'])

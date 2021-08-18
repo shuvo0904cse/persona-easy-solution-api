@@ -4,9 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration
+class CreateUserGroceryGroupsTable extends Migration
 {
-
     /**
      * Run the migrations.
      *
@@ -14,16 +13,10 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('user_grocery_groups', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('user_id')->index();
             $table->string('name')->index();
-            $table->string('image')->nullable();
-            $table->string('email')->unique()->index();
-            $table->string('phone_number')->unique()->nullable();
-            $table->dateTime('email_verified_at')->nullable();
-            $table->string('password');
-            $table->enum('status',['PENDING', 'ACTIVE', 'BLOCK'])->default("PENDING");
-            $table->string('remember_token')->nullable();
             $table->uuid('created_by')->nullable();
             $table->uuid('updated_by')->nullable();
             $table->uuid('deleted_by')->nullable();
@@ -31,13 +24,13 @@ class CreateUsersTable extends Migration
             $table->softDeletes();
         });
 
-        Schema::table('users', function($table) {
+        Schema::table('user_grocery_groups', function($table) {
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade');
         });
     }
-
 
     /**
      * Reverse the migrations.
@@ -46,7 +39,6 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
-        Schema::drop('users');
+        Schema::dropIfExists('user_grocery_groups');
     }
-
 }

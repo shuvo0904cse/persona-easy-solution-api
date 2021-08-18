@@ -37,11 +37,5 @@ return [
 
     "default_category_already_generated"            => "Default Category Already Generated",
     "default_category_generated_successfully"       => "Default Category Generated Successfully",
-    'validation_message'                            => [
-        'required' => 'The :attribute field is required.',
-        'unique'   => 'This :attribute has already been used.',
-        'in'       => 'The :attribute field not match.',
-        'regex'    => 'The :attribute field not correct format.'
-    ]
 ];
 

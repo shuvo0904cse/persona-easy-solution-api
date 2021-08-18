@@ -62,7 +62,8 @@ $app->singleton(
 $app->configure('auth');
 $app->configure('setting');
 $app->configure('message');
-$app->configure('services');
+$app->configure('app');
+$app->configure('seeder');
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -96,9 +97,7 @@ $app->configure('services');
 // $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
- // Add this line
- $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
-
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 
 /*

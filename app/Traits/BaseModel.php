@@ -6,10 +6,11 @@ namespace App\Traits;
 use App\Scopes\QueryForUserIdScope;
 use App\Services\UserService;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Schema;
 
 trait BaseModel
 {
-    use SoftDeletes;
+    use SoftDeletes, UsesUuid;
 
     /**
      * Exists Check
@@ -22,12 +23,21 @@ trait BaseModel
     /**
      * lists
      */
-    public function lists($isPaginate = true, $limit = 20)
+    public function lists($requestData)
     {
         $query = self::query();
 
+        //limit
+        $limit = isset($requestData['limit']) && !empty($requestData['limit']) ? $requestData['limit'] : 10; 
+
+        //if search exists
+        if(isset($requestData['search'])) $query = $query->ofSearch($requestData['search']['fields'], $requestData['search']['value']);
+
+        //if filter exists
+        if(isset($requestData['filter'])) $query = $query->ofFilter($requestData['filter']);
+
         //if paginate
-        if($isPaginate) return $query->paginate($limit);
+        if(isset($requestData['is_pagination']) && $requestData['is_pagination'] == true) return $query->paginate($limit);
 
         //if not paginate
         return $query->get();
@@ -87,8 +97,10 @@ trait BaseModel
      */
     public function scopeOfSearch($query, $fields = [], $search = [])
     {
-        if (!empty($fields)) {
+        if (!empty($fields) && !empty($search)) {
             foreach ($fields as $relation => $field) {
+                if(is_string($search)) $search = [$search];
+                
                 if (is_array($field)) {
                     $query->orWhereHas($relation, function ($q) use ($field, $search) {
                         $q->where(function ($q) use ($field, $search) {
@@ -142,23 +154,21 @@ trait BaseModel
     {
         parent::boot();
 
-       /*  self::creating(function ($model) {
-            if (Schema::hasColumn($model->getTable(), 'user_id')) $model->user_id = $this->userService()->getLoggedInUserId();
-            if (Schema::hasColumn($model->getTable(), 'created_by')) $model->user_id = $this->userService()->getLoggedInUserId();
+        $userService = new UserService();
+
+        self::creating(function ($model) use($userService) {
+            if (Schema::hasColumn($model->getTable(), 'user_id')) $model->user_id = $userService->getLoggedInUserId();
+            if (Schema::hasColumn($model->getTable(), 'created_by')) $model->created_by = $userService->getLoggedInUserId();
         });
 
-        self::updated(function ($model) {
-            if (Schema::hasColumn($model->getTable(), 'updated_by')) $model->user_id = $this->userService()->getLoggedInUserId();
+        self::updated(function ($model) use($userService) {
+            if (Schema::hasColumn($model->getTable(), 'updated_by')) $model->updated_by = $userService->getLoggedInUserId();
         });
 
-        self::deleted(function ($model) {
-            if (Schema::hasColumn($model->getTable(), 'deleted_by')) $model->user_id = $this->userService()->getLoggedInUserId();
-        }); */
+        self::deleted(function ($model) use($userService) {
+            if (Schema::hasColumn($model->getTable(), 'deleted_by')) $model->deleted_by = $userService->getLoggedInUserId();
+        }); 
 
         return static::addGlobalScope(new QueryForUserIdScope());
-    }
-
-    protected function userService(){
-        return new UserService();
     }
 }

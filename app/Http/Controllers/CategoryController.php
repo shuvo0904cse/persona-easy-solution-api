@@ -7,6 +7,7 @@ use App\Helpers\MessageHelper;
 use App\Helpers\UtilsHelper;
 use App\Http\Resources\CategoryListResource;
 use App\Models\Category;
+use App\Services\GenerateDefaultCategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -27,7 +28,19 @@ class CategoryController extends Controller
     public function category(Request $request)
     {
         try{
-            $lists = $this->categoryModel()->lists(true, $request->limit, $request->search);
+            //filter
+            $filterArray = [
+                "is_pagination" => true,
+                "limit"         => $request->limit,
+                "search"        => [
+                    "fields"    => ['id', 'name', 'icon'],
+                    "value"     => $request->search
+                ],
+                "filter"        => [
+                    ['fields' => "type", 'filter' => $request->type]
+                ]
+            ];
+            $lists = $this->categoryModel()->lists($filterArray);
 
             $array = [
                 "data"      => CategoryListResource::collection($lists->items()),
@@ -65,13 +78,12 @@ class CategoryController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|unique:categories,name',
             'type' => 'required|in:INCOME,EXPENSE'
-        ]);
+        ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
         try{
             //store data
             $categoryArray = [
-                "user_id"                   => 1,
                 "name"                      => $request['name'],
                 "icon"                      => $request['icon'],
                 "type"                      => $request['type']
@@ -92,7 +104,7 @@ class CategoryController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|unique:categories,name',
             'type' => 'required|in:INCOME,EXPENSE'
-        ]);
+        ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
          //category details
@@ -140,10 +152,25 @@ class CategoryController extends Controller
         }
     }
 
-    /**
-     * category Model
+     /**
+     * generate Default Category
      */
+    public function generateCategory(){
+        try{
+            //generate
+            $generate = $this->generateDefaultCategoryService()->generate()->getData();
+            return $this->message::successMessage($generate);
+        } catch (\Exception $e) {
+            $this->Log::error("generate-category", $e);
+            return $this->message::errorMessage();
+        }
+    }
+
     private function categoryModel(){
         return new Category();
+    }
+
+    private function generateDefaultCategoryService(){
+        return new GenerateDefaultCategoryService();
     }
 }
