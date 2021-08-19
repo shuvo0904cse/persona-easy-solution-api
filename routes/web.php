@@ -13,12 +13,16 @@
 |
 */
 
+$router->get('/', function () {
+    return phpinfo();
+});
+
 $router->group(['prefix' => 'api'], function () use ($router){
 
     $router->post('login', 'AuthController@login');
     $router->post('register', 'AuthController@register');
 
-    $router->group(['middleware' => 'auth'], function () use ($router){
+   // $router->group(['middleware' => 'auth'], function () use ($router){
         //Category
         $router->get('categories', 'CategoryController@category');
         $router->post('store-category', 'CategoryController@store');
@@ -39,9 +43,9 @@ $router->group(['prefix' => 'api'], function () use ($router){
         $router->delete('delete-grocery/{id}', 'GroceryController@delete');
 
          //User Grocery Group
-         $router->get('user-grocery-group', 'UserGroceryGroupController@grocery');
+         $router->get('user-grocery-group', 'UserGroceryGroupController@userGroceryGroup');
          $router->post('store-user-grocery-group', 'UserGroceryGroupController@store');
          $router->put('update-user-grocery-group/{id}', 'UserGroceryGroupController@update');
          $router->delete('delete-user-grocery-group/{id}', 'UserGroceryGroupController@delete');
-    });
+   // });
 });

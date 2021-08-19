@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMoniesTable extends Migration
+class CreateMoneyTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateMoniesTable extends Migration
      */
     public function up()
     {
-        Schema::create('monies', function (Blueprint $table) {
+        Schema::create('money', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id')->index();
             $table->uuid('category_id')->index();
@@ -27,7 +27,7 @@ class CreateMoniesTable extends Migration
             $table->softDeletes();
         });
 
-        Schema::table('monies', function($table) {
+        Schema::table('money', function($table) {
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
@@ -43,6 +43,6 @@ class CreateMoniesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('monies');
+        Schema::dropIfExists('money');
     }
 }

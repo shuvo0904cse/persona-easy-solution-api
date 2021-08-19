@@ -30,7 +30,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required'
-        ]);
+        ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
         
         try{
@@ -56,7 +56,7 @@ class AuthController extends Controller
             'email' => 'required|unique:users',
             'phone_number'  => 'required|string',
             'password' => 'required|min:5|max:8'
-        ]);
+        ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
         try{

@@ -18,6 +18,11 @@ class UserGroceryGroup extends Model
     
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id')
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function userGroceries()
+    {
+        return $this->belongsToMany(Grocery::class, "user_groceries")->withPivot('amount', 'unit');;
     }
 }

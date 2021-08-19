@@ -37,7 +37,7 @@ trait BaseModel
         if(isset($requestData['filter'])) $query = $query->ofFilter($requestData['filter']);
 
         //if paginate
-        if(isset($requestData['is_pagination']) && $requestData['is_pagination'] == true) return $query->paginate($limit);
+        if(isset($requestData['is_pagination']) && $requestData['is_pagination'] == true) return $query->with('users')->toRawSql();
 
         //if not paginate
         return $query->get();
@@ -169,6 +169,6 @@ trait BaseModel
             if (Schema::hasColumn($model->getTable(), 'deleted_by')) $model->deleted_by = $userService->getLoggedInUserId();
         }); 
 
-        return static::addGlobalScope(new QueryForUserIdScope());
+        //return static::addGlobalScope(new QueryForUserIdScope());
     }
 }

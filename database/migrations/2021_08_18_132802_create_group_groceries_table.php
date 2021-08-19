@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUserGroceriesTable extends Migration
+class CreateGroupGroceriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,16 @@ class CreateUserGroceriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_groceries', function (Blueprint $table) {
+        Schema::create('group_groceries', function (Blueprint $table) {
             $table->uuid('user_grocery_group_id')->index();
             $table->uuid('grocery_id')->index();
             $table->string('amount')->default(1);
             $table->string('unit')->default("kg");
         });
 
-        Schema::table('user_groceries', function($table) {
-            $table->foreign('user_grocery_group_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('grocery_id')->references('id')->on('users')->onDelete('cascade');
+        Schema::table('group_groceries', function($table) {
+           // $table->foreign('user_grocery_group_id')->references('id')->on('user_grocery_groups')->onDelete('cascade');
+         //   $table->foreign('grocery_id')->references('id')->on('groceries')->onDelete('cascade');
         });
     }
 
@@ -33,6 +33,6 @@ class CreateUserGroceriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_groceries');
+        Schema::dropIfExists('group_groceries');
     }
 }

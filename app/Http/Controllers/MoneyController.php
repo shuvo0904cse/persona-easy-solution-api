@@ -6,7 +6,8 @@ use App\Helpers\LogHelper;
 use App\Helpers\MessageHelper;
 use App\Helpers\UtilsHelper;
 use App\Http\Resources\MoneyListResource;
-use App\Models\MoneyModel;
+use App\Models\Category;
+use App\Models\Money;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -39,16 +40,16 @@ class MoneyController extends Controller
                     ['fields' => ['categories' => 'type'], 'filter' => $request->type],
                 ]
             ];
-            
+        
             $lists = $this->moneyModel()->lists($filterArray);
-            dd($lists);
+            
             $array = [
                 "data"      => MoneyListResource::collection($lists->items()),
                 "paginate"  => UtilsHelper::getPaginate($lists)
             ];
             return $this->message::successMessage("", $array);
         } catch (\Exception $e) {
-            $this->log::error("details-category", $e);
+            $this->log::error("details-money", $e);
             return $this->message::errorMessage();
         }
     }
@@ -81,6 +82,12 @@ class MoneyController extends Controller
             'title'         => 'required|string'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
+
+        //category details
+        $category = $this->categoryModel()->details($request->category_id);
+
+        //if category not exists
+        if(empty($category)) return $this->message::errorMessage("Category ". config("message.not_exit"));
 
         try{
             //store data
@@ -160,6 +167,13 @@ class MoneyController extends Controller
      * category Model
      */
     private function moneyModel(){
-        return new MoneyModel();
+        return new Money();
+    }
+
+    /**
+     * category Model
+     */
+    private function categoryModel(){
+        return new Category();
     }
 }

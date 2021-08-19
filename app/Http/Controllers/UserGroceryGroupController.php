@@ -7,6 +7,7 @@ use App\Helpers\MessageHelper;
 use App\Helpers\UtilsHelper;
 use App\Models\UserGroceryGroup;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class UserGroceryGroupController extends Controller
@@ -23,7 +24,7 @@ class UserGroceryGroupController extends Controller
      /**
      * index
      */
-    public function userGrocery(Request $request)
+    public function userGroceryGroup(Request $request)
     {
         try{
             //filter
@@ -35,16 +36,16 @@ class UserGroceryGroupController extends Controller
                     "value"     => $request->search
                 ]
             ];
-            $lists = $this->userGroceryGroupModel()->lists($filterArray);
-
-            $array = [
-                "data"      => $lists->items(),
-                "paginate"  => UtilsHelper::getPaginate($lists)
-            ];
-            return $this->message::successMessage("", $array);
+            $lists = $this->userGroceryGroupModel()->with('users')->toSql();
+            return $lists;
+            // $array = [
+            //     "data"      => $lists->items(),
+            //     "paginate"  => UtilsHelper::getPaginate($lists)
+            // ];
+            // return $this->message::successMessage("", $array);
         } catch (\Exception $e) {
             $this->log::error("lists-user-grocery-group", $e);
-            return $this->message::errorMessage();
+            return $this->message::errorMessage($e->getMessage().$e->getFile().$e->getLine());
         }
     }
 
@@ -71,10 +72,12 @@ class UserGroceryGroupController extends Controller
      */
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string'
+            'name' => 'required|string',
+            'groceries' => 'required|array',
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
+        DB::beginTransaction();
         try{
             //store data
             $array = [
@@ -82,10 +85,20 @@ class UserGroceryGroupController extends Controller
             ];
             $grocery = $this->userGroceryGroupModel()->storeData( $array);
 
+            //users grocery
+            $amount = $request->amount;
+            $groceries = collect($request->groceries)->map(function() use ($amount){
+                return ['amount' => $amount];
+            });
+            dd($groceries);
+            $grocery->userGroceries()->sync($request->groceries);
+
+            DB::commit();
             return $this->message::successMessage(config("message.save_message"), $grocery);
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->log::error("store-user-grocery-group", $e);
-            return $this->message::errorMessage();
+            return $this->message::errorMessage($e->getMessage());
         }
     }
 
@@ -104,6 +117,7 @@ class UserGroceryGroupController extends Controller
          //if grocery not exists
          if(empty($details)) return $this->message::errorMessage("User Grocery ". config("message.not_exit"));
 
+        DB::beginTransaction();
         try{
             //update data
             $array = [
@@ -114,8 +128,10 @@ class UserGroceryGroupController extends Controller
              //details
             $details = $this->userGroceryGroupModel()->details($id);
 
+            DB::commit();
             return $this->message::successMessage(config("message.update_message"), $details);
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->log::error("update-user-grocery-group", $e);
             return $this->message::errorMessage();
         }
@@ -131,11 +147,18 @@ class UserGroceryGroupController extends Controller
         //if category not exists
         if(empty($details)) return $this->message::errorMessage("User Grocery ". config("message.not_exit"));
 
+        DB::beginTransaction();
         try{
+            //delete user groceries
+            $details->userGroceries()->detach($details->id);
+
             //delete Data
             $this->userGroceryGroupModel()->deleteData( $id );
+
+            DB::commit();
             return $this->message::successMessage(config("message.delete_message"));
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->Log::error("delete-user-grocery-group", $e);
             return $this->message::errorMessage();
         }

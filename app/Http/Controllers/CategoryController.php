@@ -102,7 +102,7 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|unique:categories,name',
+            'name' => 'required|string|unique:categories,name,'.$id,
             'type' => 'required|in:INCOME,EXPENSE'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
