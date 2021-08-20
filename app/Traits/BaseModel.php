@@ -37,7 +37,7 @@ trait BaseModel
         if(isset($requestData['filter'])) $query = $query->ofFilter($requestData['filter']);
 
         //if paginate
-        if(isset($requestData['is_pagination']) && $requestData['is_pagination'] == true) return $query->with('users')->toRawSql();
+        if(isset($requestData['is_pagination']) && $requestData['is_pagination'] == true) return $query->paginate($limit);
 
         //if not paginate
         return $query->get();
