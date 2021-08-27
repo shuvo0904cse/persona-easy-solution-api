@@ -15,11 +15,10 @@ class CreateCategoriesTable extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('user_id')->index();
-            $table->string('name')->index();
+            $table->string('title')->index();
             $table->string('icon')->nullable();
             $table->enum('type', ["INCOME", "EXPENSE"]);
-            $table->uuid('created_by')->nullable();
+            $table->uuid('created_by');
             $table->uuid('updated_by')->nullable();
             $table->uuid('deleted_by')->nullable();
             $table->timestamps();
@@ -27,7 +26,6 @@ class CreateCategoriesTable extends Migration
         });
 
         Schema::table('categories', function($table) {
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade');

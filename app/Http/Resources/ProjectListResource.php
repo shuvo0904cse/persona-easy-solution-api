@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CategoryListResource extends JsonResource
+class ProjectListResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,8 +14,10 @@ class CategoryListResource extends JsonResource
         return [
             "id"            => $this['id'],
             "title"         => $this['title'],
-            "icon"          => $this['icon'],
-            "type"          => $this['type'],
+            "description"   => $this['description'],
+            "start_date"    => $this['start_date'],
+            "end_date"      => $this['end_date'],
+            "status"        => $this['status'],
             "created_at"    => $this['created_at'],
             "updated_at"    => $this['updated_at']
         ];

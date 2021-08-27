@@ -91,7 +91,7 @@ class GenerateDefaultCategoryService
     private function storeDefaultIncome($incomes){
         foreach($incomes as $income){
             $incomeArray = [
-                "name"  => $income,
+                "title"  => $income,
                 "type"  => config("setting.income")
             ];
             $this->categoryModel()->storeData($incomeArray);
@@ -104,7 +104,7 @@ class GenerateDefaultCategoryService
     private function storeDefaultExpense($expenses){
         foreach($expenses as $expense){
             $expenseArray = [
-                "name"  => $expense,
+                "title"  => $expense,
                 "type"  => config("setting.expense")
             ];
             $this->categoryModel()->storeData($expenseArray);

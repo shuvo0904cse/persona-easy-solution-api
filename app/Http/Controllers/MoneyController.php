@@ -33,7 +33,7 @@ class MoneyController extends Controller
                 "is_pagination" => true,
                 "limit"         => $request->limit,
                 "search"        => [
-                    "fields"    => ['id', 'amount', 'title', 'note', 'categories' => ['id', 'name']],
+                    "fields"    => ['id', 'amount', 'title', 'note', 'categories' => ['id', 'title']],
                     "value"     => $request->search
                 ],
                 "filter"        => [

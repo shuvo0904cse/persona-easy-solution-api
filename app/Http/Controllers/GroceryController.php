@@ -32,7 +32,7 @@ class GroceryController extends Controller
                 "is_pagination" => true,
                 "limit"         => $request->limit,
                 "search"        => [
-                    "fields"    => ['id', 'name'],
+                    "fields"    => ['id', 'title'],
                     "value"     => $request->search
                 ]
             ];
@@ -72,14 +72,14 @@ class GroceryController extends Controller
      */
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|unique:groceries,name'
+            'title' => 'required|string|unique:groceries,title'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
         try{
             //store data
             $groceryArray = [
-                "name"                      => $request['name']
+                "title"                      => $request['title']
             ];
             $grocery = $this->groceryModel()->storeData( $groceryArray);
 
@@ -95,7 +95,7 @@ class GroceryController extends Controller
      */
     public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|unique:grocery,name'
+            'title' => 'required|string|unique:grocery,title'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
@@ -108,7 +108,7 @@ class GroceryController extends Controller
         try{
             //update data
             $groceryArray = [
-                "name"                      => $request['name']
+                "title"                      => $request['title']
             ];
             $this->groceryModel()->updateData( $groceryArray, $grocery->id );
 

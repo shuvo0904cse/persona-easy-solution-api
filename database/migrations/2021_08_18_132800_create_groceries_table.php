@@ -15,7 +15,7 @@ class CreategroceriesTable extends Migration
     {
         Schema::create('groceries', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name')->index();
+            $table->string('title')->index();
             $table->timestamps();
             $table->softDeletes();
         });

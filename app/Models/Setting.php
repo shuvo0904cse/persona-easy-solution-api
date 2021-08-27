@@ -12,7 +12,6 @@ class Setting extends Model
     protected $table = 'settings';
 
     protected $fillable = [
-        'user_id',
         'generate_default_category'
     ];
 }

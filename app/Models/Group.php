@@ -5,20 +5,19 @@ namespace App\Models;
 use App\Traits\BaseModel;
 use Illuminate\Database\Eloquent\Model;
 
-class UserGroceryGroup extends Model
+class Group extends Model
 {
     use BaseModel;
 
-    protected $table = 'user_grocery_groups';
+    protected $table = 'groups';
 
     protected $fillable = [
-        'user_id',
-        'name'
+        'title'
     ];
     
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
     public function userGroceries()

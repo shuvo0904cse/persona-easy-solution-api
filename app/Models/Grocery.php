@@ -12,6 +12,6 @@ class Grocery extends Model
     protected $table = 'groceries';
 
     protected $fillable = [
-        'name'
+        'title'
     ];
 }

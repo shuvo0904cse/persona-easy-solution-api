@@ -157,7 +157,6 @@ trait BaseModel
         $userService = new UserService();
 
         self::creating(function ($model) use($userService) {
-            if (Schema::hasColumn($model->getTable(), 'user_id')) $model->user_id = $userService->getLoggedInUserId();
             if (Schema::hasColumn($model->getTable(), 'created_by')) $model->created_by = $userService->getLoggedInUserId();
         });
 
@@ -169,6 +168,6 @@ trait BaseModel
             if (Schema::hasColumn($model->getTable(), 'deleted_by')) $model->deleted_by = $userService->getLoggedInUserId();
         }); 
 
-        //return static::addGlobalScope(new QueryForUserIdScope());
+        return static::addGlobalScope(new QueryForUserIdScope());
     }
 }

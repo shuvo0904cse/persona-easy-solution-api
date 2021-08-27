@@ -33,7 +33,7 @@ class CategoryController extends Controller
                 "is_pagination" => true,
                 "limit"         => $request->limit,
                 "search"        => [
-                    "fields"    => ['id', 'name', 'icon'],
+                    "fields"    => ['id', 'title', 'icon'],
                     "value"     => $request->search
                 ],
                 "filter"        => [
@@ -76,7 +76,7 @@ class CategoryController extends Controller
      */
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|unique:categories,name',
+            'title' => 'required|string|unique:categories,title',
             'type' => 'required|in:INCOME,EXPENSE'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
@@ -84,7 +84,7 @@ class CategoryController extends Controller
         try{
             //store data
             $categoryArray = [
-                "name"                      => $request['name'],
+                "title"                      => $request['title'],
                 "icon"                      => $request['icon'],
                 "type"                      => $request['type']
             ];
@@ -102,7 +102,7 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|unique:categories,name,'.$id,
+            'title' => 'required|string|unique:categories,title,'.$id,
             'type' => 'required|in:INCOME,EXPENSE'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
@@ -116,7 +116,7 @@ class CategoryController extends Controller
         try{
             //update data
             $categoryArray = [
-                "name"                      => $request['name'],
+                "title"                     => $request['title'],
                 "icon"                      => $request['icon'],
                 "type"                      => $request['type']
             ];
