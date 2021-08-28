@@ -20,7 +20,7 @@ class GrocerySeeder extends Seeder
         $groceries = config("seeder.groceries");
         foreach ($groceries as $grocery){
             $array = [
-                "name"    => $grocery
+                "title"    => $grocery
             ];
             $this->groceryModel()->storeData($array);
         }
