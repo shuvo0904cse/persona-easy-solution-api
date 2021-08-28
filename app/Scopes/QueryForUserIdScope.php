@@ -17,7 +17,7 @@ class QueryForUserIdScope implements Scope
     public function apply(Builder $builder, Model $model)
     {
         $columnName = $model->getTable().".created_by";
-        if (Schema::hasColumn($model->getTable(), 'created_by')){
+        if ($model->getTable() != "users" && Schema::hasColumn($model->getTable(), 'created_by')){
             $builder->where($columnName, Auth::user()->id);
         }
     }
