@@ -24,7 +24,7 @@ $router->group(['prefix' => 'api'], function () use ($router){
 
     $router->group(['middleware' => 'auth'], function () use ($router){
         //Category
-        $router->get('categories', 'CategoryController@category');
+        $router->get('category', 'CategoryController@category');
         $router->post('store-category', 'CategoryController@store');
         $router->put('update-category/{id}', 'CategoryController@update');
         $router->delete('delete-category/{id}', 'CategoryController@delete');
