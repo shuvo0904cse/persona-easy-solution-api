@@ -54,15 +54,15 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'email' => 'required|unique:users',
-            'phone_number'  => 'required|string',
-            'password' => 'required|min:5|max:8'
+            'phone_number'  => 'required',
+            'password' => 'required'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
         try{
             //store data
             $userArray = [
-                "name"    => $request['first_name'],
+                "name"          => $request['name'],
                 "email"         => $request['email'],
                 "phone_number"  => isset($request['phone_number']) ? $request['phone_number'] : null,
                 "password"      => Hash::make($request['password'])
