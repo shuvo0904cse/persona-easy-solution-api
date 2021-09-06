@@ -22,6 +22,6 @@ class Group extends Model
 
     public function userGroceries()
     {
-        return $this->belongsToMany(Grocery::class, "user_groceries")->withPivot('amount', 'unit');;
+        return $this->belongsToMany(Grocery::class, "group_groceries")->withPivot('amount', 'unit');;
     }
 }

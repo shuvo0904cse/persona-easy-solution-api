@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRemindersTable extends Migration
+class CreateProjectsMoneyTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,13 @@ class CreateRemindersTable extends Migration
      */
     public function up()
     {
-        Schema::create('reminders', function (Blueprint $table) {
+        Schema::create('projects_money', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('phase_id')->index();
             $table->string('title')->index();
-            $table->string('description')->nullable();
+            $table->longText('description')->nullable();
+            $table->double('amount', 15, 2)->nullable();
+            $table->enum('type', ['INCOME', 'EXPENSE']);
             $table->uuid('created_by');
             $table->uuid('updated_by')->nullable();
             $table->uuid('deleted_by')->nullable();
@@ -24,7 +27,8 @@ class CreateRemindersTable extends Migration
             $table->softDeletes();
         });
 
-        Schema::table('reminders', function($table) {
+        Schema::table('projects_money', function($table) {
+            $table->foreign('phase_id')->references('id')->on('projects_phase')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade');
@@ -38,6 +42,6 @@ class CreateRemindersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reminders');
+        Schema::dropIfExists('projects_money');
     }
 }

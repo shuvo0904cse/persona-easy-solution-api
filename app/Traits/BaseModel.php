@@ -46,9 +46,13 @@ trait BaseModel
     /**
      * Details
      */
-    public function details($columnValue, $columnName = "id", $withTrashed = false)
+    public function details($columnValue, $columnName = "id", $withTrashed = false, $releations=[])
     {
-        $query = self::where($columnName, $columnValue);
+        $query = self::query();
+
+        if(!empty($releations)) $query = $query->with($releations);
+
+        $query = $query->where($columnName, $columnValue);
 
         if($withTrashed == true) $query = $query->withTrashed();
 

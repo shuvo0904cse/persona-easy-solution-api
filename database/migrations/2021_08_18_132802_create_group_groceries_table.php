@@ -16,8 +16,8 @@ class CreateGroupGroceriesTable extends Migration
         Schema::create('group_groceries', function (Blueprint $table) {
             $table->uuid('group_id')->index();
             $table->uuid('grocery_id')->index();
-            $table->string('amount')->default(1);
-            $table->string('unit')->default("kg");
+            $table->string('amount')->nullable()->default(1);
+            $table->string('unit')->nullable()->default("kg");
         });
     }
 

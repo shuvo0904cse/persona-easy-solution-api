@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Helpers\LogHelper;
 use App\Helpers\MessageHelper;
 use App\Helpers\UtilsHelper;
-use App\Http\Resources\ProjectListResource;
+use App\Http\Resources\ProjectPhaseListResource;
 use App\Models\Project;
+use App\Models\ProjectPhase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class ProjectController extends Controller
+class ProjectPhaseController extends Controller
 {
     private $message;
     private $log;
@@ -25,7 +26,7 @@ class ProjectController extends Controller
      /**
      * index
      */
-    public function project(Request $request)
+    public function projectPhase(Request $request)
     {
         try{
             //filter
@@ -33,19 +34,19 @@ class ProjectController extends Controller
                 "is_pagination" => true,
                 "limit"         => $request->limit,
                 "search"        => [
-                    "fields"    => ['id', 'title', 'description', 'start_date', 'end_date'],
+                    "fields"    => ['id', 'title', 'description'],
                     "value"     => $request->search
                 ]
             ];
-            $lists = $this->projectModel()->lists($filterArray);
+            $lists = $this->projectPhaseModel()->lists($filterArray);
 
             $array = [
-                "data"      => ProjectListResource::collection($lists->items()),
+                "data"      => ProjectPhaseListResource::collection($lists->items()),
                 "paginate"  => UtilsHelper::getPaginate($lists)
             ];
             return $this->message::successMessage("", $array);
         } catch (\Exception $e) {
-            $this->log::error("lists-project", $e);
+            $this->log::error("lists-project-phase", $e);
             return $this->message::errorMessage();
         }
     }
@@ -56,14 +57,14 @@ class ProjectController extends Controller
     public function detailsById($id){
         try{
             //details
-            $details = $this->projectModel()->details($id);
+            $details = $this->projectPhaseModel()->details($id);
 
             //if not exists
-            if(empty($details)) return $this->message::errorMessage("Project ". config("message.not_exit"));
+            if(empty($details)) return $this->message::errorMessage("Project Phase ". config("message.not_exit"));
 
             return $this->message::successMessage("", $details);
         } catch (\Exception $e) {
-            $this->log::error("details-project", $e);
+            $this->log::error("details-project-phase", $e);
             return $this->message::errorMessage();
         }
     }
@@ -73,23 +74,26 @@ class ProjectController extends Controller
      */
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string'
+            'project_id' => 'required',
+            'title' => 'required|string',
+            'amount' => 'required|regex:/^\d+(\.\d{1,2})?$/'
         ], config("message.validation_message"));
+        
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
         try{
             //store data
             $array = [
+                "project_id"    => $request['project_id'],
                 "title"         => $request['title'],
                 "description"   => $request['description'],
-                "start_date"    => $request['start_date'],
-                "end_date"      => $request['end_date'],
+                "amount"        => $request['amount']
             ];
-            $grocery = $this->projectModel()->storeData( $array);
+            $grocery = $this->projectPhaseModel()->storeData( $array);
 
             return $this->message::successMessage(config("message.save_message"), $grocery);
         } catch (\Exception $e) {
-            $this->log::error("store-project", $e);
+            $this->log::error("store-project-phase", $e);
             return $this->message::errorMessage($e->getMessage());
         }
     }
@@ -99,32 +103,34 @@ class ProjectController extends Controller
      */
     public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string'
+            'project_id' => 'required',
+            'title' => 'required|string',
+            'amount' => 'required|regex:/^\d+(\.\d{1,2})?$/'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
          //details
-         $details = $this->projectModel()->details($id);
+         $details = $this->projectPhaseModel()->details($id);
 
          //if not exists
-         if(empty($details)) return $this->message::errorMessage("Project ". config("message.not_exit"));
+         if(empty($details)) return $this->message::errorMessage("Project Phase ". config("message.not_exit"));
 
         try{
             //update data
             $array = [
+                "project_id"    => $request['project_id'],
                 "title"         => $request['title'],
                 "description"   => $request['description'],
-                "start_date"    => $request['start_date'],
-                "end_date"      => $request['end_date'],
+                "amount"        => $request['amount']
             ];
-            $this->projectModel()->updateData( $array, $details->id );
+            $this->projectPhaseModel()->updateData( $array, $details->id );
 
              //details
-            $details = $this->projectModel()->details($id);
+            $details = $this->projectPhaseModel()->details($id);
 
             return $this->message::successMessage(config("message.update_message"), $details);
         } catch (\Exception $e) {
-            $this->log::error("update-project", $e);
+            $this->log::error("update-project-phase", $e);
             return $this->message::errorMessage();
         }
     }
@@ -134,16 +140,14 @@ class ProjectController extends Controller
      */
     public function delete($id){
         //grocery details
-        $details = $this->projectModel()->details($id);
+        $details = $this->projectPhaseModel()->details($id);
 
         //if not exists
-        if(empty($details)) return $this->message::errorMessage("Project ". config("message.not_exit"));
+        if(empty($details)) return $this->message::errorMessage("Project Phase ". config("message.not_exit"));
 
         try{
-            //delete project
-            $this->projectModel()->deleteData( $id );
-
-            //delete project phase
+            //delete project pase
+            $this->projectPhaseModel()->deleteData( $id );
 
             //delete project phase money
 
@@ -154,34 +158,7 @@ class ProjectController extends Controller
         }
     }
 
-    /**
-     * Delete
-     */
-    public function updateStatus($id){
-        //grocery details
-        $details = $this->projectModel()->details($id);
-
-        //if not exists
-        if(empty($details)) return $this->message::errorMessage("Note ". config("message.not_exit"));
-
-        try{
-            //update data
-            $array = [
-                "status"       => $details['status'] 
-            ];
-            $this->projectModel()->updateData( $array, $details->id );
-
-             //details
-            $details = $this->projectModel()->details($id);
-
-            return $this->message::successMessage(config("message.update_message"), $details);
-        } catch (\Exception $e) {
-            $this->Log::error("update-project-note", $e);
-            return $this->message::errorMessage();
-        }
-    }
-
-    private function projectModel(){
-        return new Project();
+    private function projectPhaseModel(){
+        return new ProjectPhase();
     }
 }

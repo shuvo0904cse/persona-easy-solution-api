@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Helpers\LogHelper;
 use App\Helpers\MessageHelper;
 use App\Helpers\UtilsHelper;
-use App\Http\Resources\ProjectListResource;
+use App\Http\Resources\ProjectMoneyListResource;
 use App\Models\Project;
+use App\Models\ProjectMoney;
+use App\Models\ProjectPhase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class ProjectController extends Controller
+class ProjectMoneyController extends Controller
 {
     private $message;
     private $log;
@@ -25,7 +27,7 @@ class ProjectController extends Controller
      /**
      * index
      */
-    public function project(Request $request)
+    public function projectMoney(Request $request)
     {
         try{
             //filter
@@ -37,10 +39,10 @@ class ProjectController extends Controller
                     "value"     => $request->search
                 ]
             ];
-            $lists = $this->projectModel()->lists($filterArray);
+            $lists = $this->projectMoneyModel()->lists($filterArray);
 
             $array = [
-                "data"      => ProjectListResource::collection($lists->items()),
+                "data"      => ProjectMoneyListResource::collection($lists->items()),
                 "paginate"  => UtilsHelper::getPaginate($lists)
             ];
             return $this->message::successMessage("", $array);
@@ -56,14 +58,14 @@ class ProjectController extends Controller
     public function detailsById($id){
         try{
             //details
-            $details = $this->projectModel()->details($id);
+            $details = $this->projectMoneyModel()->details($id);
 
             //if not exists
-            if(empty($details)) return $this->message::errorMessage("Project ". config("message.not_exit"));
+            if(empty($details)) return $this->message::errorMessage("Project Money ". config("message.not_exit"));
 
             return $this->message::successMessage("", $details);
         } catch (\Exception $e) {
-            $this->log::error("details-project", $e);
+            $this->log::error("details-project-money", $e);
             return $this->message::errorMessage();
         }
     }
@@ -73,23 +75,28 @@ class ProjectController extends Controller
      */
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string'
+            'phase_id' => 'required',
+            'title' => 'required|string',
+            'amount' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'type'  => 'required|in:INCOME,EXPENSE'
         ], config("message.validation_message"));
+        
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
         try{
             //store data
             $array = [
+                "phase_id"      => $request['phase_id'],
                 "title"         => $request['title'],
                 "description"   => $request['description'],
-                "start_date"    => $request['start_date'],
-                "end_date"      => $request['end_date'],
+                "amount"        => $request['amount'],
+                "type"          => $request['type']
             ];
-            $grocery = $this->projectModel()->storeData( $array);
+            $grocery = $this->projectMoneyModel()->storeData( $array);
 
             return $this->message::successMessage(config("message.save_message"), $grocery);
         } catch (\Exception $e) {
-            $this->log::error("store-project", $e);
+            $this->log::error("store-project-money", $e);
             return $this->message::errorMessage($e->getMessage());
         }
     }
@@ -99,32 +106,36 @@ class ProjectController extends Controller
      */
     public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string'
+            'phase_id' => 'required',
+            'title' => 'required|string',
+            'amount' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'type'  => 'required|in:INCOME,EXPENSE'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
          //details
-         $details = $this->projectModel()->details($id);
+         $details = $this->projectMoneyModel()->details($id);
 
          //if not exists
-         if(empty($details)) return $this->message::errorMessage("Project ". config("message.not_exit"));
+         if(empty($details)) return $this->message::errorMessage("Project Money". config("message.not_exit"));
 
         try{
             //update data
             $array = [
+                "phase_id"      => $request['phase_id'],
                 "title"         => $request['title'],
                 "description"   => $request['description'],
-                "start_date"    => $request['start_date'],
-                "end_date"      => $request['end_date'],
+                "amount"        => $request['amount'],
+                "type"          => $request['type']
             ];
-            $this->projectModel()->updateData( $array, $details->id );
+            $this->projectMoneyModel()->updateData( $array, $details->id );
 
              //details
-            $details = $this->projectModel()->details($id);
+            $details = $this->projectMoneyModel()->details($id);
 
             return $this->message::successMessage(config("message.update_message"), $details);
         } catch (\Exception $e) {
-            $this->log::error("update-project", $e);
+            $this->log::error("update-project-money", $e);
             return $this->message::errorMessage();
         }
     }
@@ -134,54 +145,25 @@ class ProjectController extends Controller
      */
     public function delete($id){
         //grocery details
-        $details = $this->projectModel()->details($id);
+        $details = $this->projectMoneyModel()->details($id);
 
         //if not exists
-        if(empty($details)) return $this->message::errorMessage("Project ". config("message.not_exit"));
+        if(empty($details)) return $this->message::errorMessage("Project Phase". config("message.not_exit"));
 
         try{
-            //delete project
-            $this->projectModel()->deleteData( $id );
-
-            //delete project phase
+            //delete project pase
+            $this->projectMoneyModel()->deleteData( $id );
 
             //delete project phase money
 
             return $this->message::successMessage(config("message.delete_message"));
         } catch (\Exception $e) {
-            $this->Log::error("delete-project", $e);
+            $this->Log::error("delete-project-money", $e);
             return $this->message::errorMessage();
         }
     }
 
-    /**
-     * Delete
-     */
-    public function updateStatus($id){
-        //grocery details
-        $details = $this->projectModel()->details($id);
-
-        //if not exists
-        if(empty($details)) return $this->message::errorMessage("Note ". config("message.not_exit"));
-
-        try{
-            //update data
-            $array = [
-                "status"       => $details['status'] 
-            ];
-            $this->projectModel()->updateData( $array, $details->id );
-
-             //details
-            $details = $this->projectModel()->details($id);
-
-            return $this->message::successMessage(config("message.update_message"), $details);
-        } catch (\Exception $e) {
-            $this->Log::error("update-project-note", $e);
-            return $this->message::errorMessage();
-        }
-    }
-
-    private function projectModel(){
-        return new Project();
+    private function projectMoneyModel(){
+        return new ProjectMoney();
     }
 }

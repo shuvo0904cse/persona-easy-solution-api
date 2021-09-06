@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRemindersViaTable extends Migration
+class CreateProjectsPhaseTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,13 @@ class CreateRemindersViaTable extends Migration
      */
     public function up()
     {
-        Schema::create('reminders_via', function (Blueprint $table) {
+        Schema::create('projects_phase', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('reminder_id')->index();
-            $table->enum('via', ['EMAIL', 'PHONE'])->nullable();
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
+            $table->uuid('project_id')->index();
+            $table->string('title')->index();
+            $table->longText('description')->nullable();
+            $table->double('amount', 15, 2)->nullable();
+            $table->enum('status', ['PENDING','IN_PROGRESS','DUE','DONE'])->default("PENDING");
             $table->uuid('created_by');
             $table->uuid('updated_by')->nullable();
             $table->uuid('deleted_by')->nullable();
@@ -26,8 +27,8 @@ class CreateRemindersViaTable extends Migration
             $table->softDeletes();
         });
 
-        Schema::table('reminders_via', function($table) {
-            $table->foreign('reminder_id')->references('id')->on('reminders')->onDelete('cascade');
+        Schema::table('projects_phase', function($table) {
+            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('deleted_by')->references('id')->on('users')->onDelete('cascade');
@@ -41,6 +42,6 @@ class CreateRemindersViaTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reminders');
+        Schema::dropIfExists('projects_phase');
     }
 }

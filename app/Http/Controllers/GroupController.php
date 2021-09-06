@@ -46,7 +46,7 @@ class GroupController extends Controller
             ];
             return $this->message::successMessage("", $array);
         } catch (\Exception $e) {
-            $this->log::error("lists-category", $e);
+            $this->log::error("lists-group", $e);
             return $this->message::errorMessage();
         }
     }
@@ -57,10 +57,10 @@ class GroupController extends Controller
     public function detailsById($id){
         try{
             //details
-            $details = $this->groupModel()->details($id);
+            $details = $this->groupModel()->details($id, "id", false, ['userGroceries']);
 
             //if not exists
-            if(empty($details)) return $this->message::errorMessage("User Grocery ". config("message.not_exit"));
+            if(empty($details)) return $this->message::errorMessage("Group ". config("message.not_exit"));
 
             return $this->message::successMessage("", $details);
         } catch (\Exception $e) {
@@ -77,6 +77,7 @@ class GroupController extends Controller
             'title' => 'required|string',
             'groceries' => 'required|array',
         ], config("message.validation_message"));
+        
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
         DB::beginTransaction();
@@ -85,18 +86,23 @@ class GroupController extends Controller
             $array = [
                 "title"                      => $request['title']
             ];
-            $grocery = $this->groupModel()->storeData( $array);
+            $group = $this->groupModel()->storeData( $array);
 
-            //users grocery
-            $amount = $request->amount;
-            $groceries = collect($request->groceries)->map(function() use ($amount){
-                return ['amount' => $amount];
-            });
-            dd($groceries);
-            $grocery->userGroceries()->sync($request->groceries);
+            //grocery
+            $groceryArray = [];
+            foreach ($request->groceries as $grocery) {
+                $groceryArray[$grocery['grocery_id']] = [
+                    'amount'        => isset($grocery['amount']) ? $grocery['amount'] : null,
+                    'unit'          => isset($grocery['unit']) ? $grocery['unit'] : null
+                ]; 
+            };       
+            $group->userGroceries()->sync($groceryArray);
+
+            //details
+            $details = $this->groupModel()->details($group->id, "id", false, ['userGroceries']);
 
             DB::commit();
-            return $this->message::successMessage(config("message.save_message"), $grocery);
+            return $this->message::successMessage(config("message.save_message"), $details);
         } catch (\Exception $e) {
             DB::rollBack();
             $this->log::error("store-group", $e);
@@ -117,18 +123,28 @@ class GroupController extends Controller
          $details = $this->groupModel()->details($id);
 
          //if grocery not exists
-         if(empty($details)) return $this->message::errorMessage("User Grocery ". config("message.not_exit"));
+         if(empty($details)) return $this->message::errorMessage("Group ". config("message.not_exit"));
 
         DB::beginTransaction();
         try{
             //update data
             $array = [
-                "title"                      => $request['title']
+                "title" => $request['title']
             ];
             $this->groupModel()->updateData( $array, $details->id );
 
+             //grocery
+             $groceryArray = [];
+             foreach ($request->groceries as $grocery) {
+                 $groceryArray[$grocery['grocery_id']] = [
+                     'amount'        => isset($grocery['amount']) ? $grocery['amount'] : null,
+                     'unit'          => isset($grocery['unit']) ? $grocery['unit'] : null
+                 ]; 
+             };       
+             $details->userGroceries()->sync($groceryArray);
+
              //details
-            $details = $this->groupModel()->details($id);
+            $details = $this->groupModel()->details($id, "id", false, ['userGroceries']);
 
             DB::commit();
             return $this->message::successMessage(config("message.update_message"), $details);
@@ -151,11 +167,12 @@ class GroupController extends Controller
 
         DB::beginTransaction();
         try{
-            //delete user groceries
+
+            //delete user groceroie
             $details->userGroceries()->detach($details->id);
 
             //delete Data
-            $this->groupModel()->deleteData( $id );
+            $this->groupModel()->deleteData($details->id);
 
             DB::commit();
             return $this->message::successMessage(config("message.delete_message"));
