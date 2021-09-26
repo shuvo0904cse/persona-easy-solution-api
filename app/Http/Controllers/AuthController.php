@@ -4,12 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Helpers\LogHelper;
 use App\Helpers\MessageHelper;
+use App\Helpers\UtilsHelper;
+use App\Mail\VerificationEmail;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -35,7 +41,7 @@ class AuthController extends Controller
         
         try{
             //credential check
-            $credentials = $request->only(['email', 'password']);
+            $credentials = ['email' => $request->email, 'password' => $request->password, 'status' => "ACTIVE"];
             if (! $token = Auth::attempt($credentials)) return $this->message::errorMessage("Unauthorized");
 
             //return success message
@@ -54,10 +60,12 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'email' => 'required|unique:users',
-            'phone_number'  => 'required',
+            'phone_number'  => 'required|unique:users',
             'password' => 'required'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
+
+        DB::beginTransaction();
 
         try{
             //store data
@@ -65,13 +73,49 @@ class AuthController extends Controller
                 "name"          => $request['name'],
                 "email"         => $request['email'],
                 "phone_number"  => isset($request['phone_number']) ? $request['phone_number'] : null,
-                "password"      => Hash::make($request['password'])
+                "password"      => Hash::make($request['password']),
+                'email_verification_token' => Str::random(40),
+                "email_verified_at" => null,
+                "status"        => "PENDING"
             ];
             $user = $this->userModel()->storeData( $userArray);
 
-            return $this->message::successMessage(config("message.save_message"), $user);
+            //mail
+            Mail::to($user->email)->send(new VerificationEmail($user));
+
+            DB::commit();
+            return $this->message::successMessage("Please check your email to activate your account", $user);
         } catch (\Exception $e) {
+            DB::rollBack();
             $this->log::error("register", $e);
+            return $this->message::errorMessage($e->getMessage());
+        }
+    }
+
+    /**
+     * Verify Email
+     */
+    public function VerifyEmail($token){
+        
+        //if token null
+        if($token == null) return $this->message::errorMessage("Invalid Login attempt");
+        
+        //token verify
+        $user = $this->userModel()->details($token, 'email_verification_token');
+        if(empty($user)) return $this->message::errorMessage("Invalid Login attempt");
+        
+        try{
+            //update user
+            $userArray = [
+                "email_verified_at"         => Carbon::now(),
+                'email_verification_token'  => null,
+                "status"                    => "ACTIVE"
+            ];
+            $user = $this->userModel()->updateData($userArray, $user->id);
+
+            return $this->message::successMessage("Your account is activated, you can log in now");
+        } catch (\Exception $e) {
+            $this->log::error("VerifyEmail", $e);
             return $this->message::errorMessage($e->getMessage());
         }
     }

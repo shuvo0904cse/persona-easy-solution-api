@@ -17,6 +17,7 @@ class MoneyListResource extends JsonResource
         return [
             "id"            => $this['id'],
             "category"      => $this['category_id'],
+            "category_title"=> CategoryListResource::make($this['category']), 
             "amount"        => $this['amount'],
             "title"         => $this['title'],
             "note"          => $this['note'],

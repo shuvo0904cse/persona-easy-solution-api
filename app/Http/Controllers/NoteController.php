@@ -73,7 +73,8 @@ class NoteController extends Controller
      */
     public function store(Request $request){
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string'
+            'title' => 'required|string',
+            'type' => 'required|in:NORMAL,EMERGENCY'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
@@ -82,6 +83,7 @@ class NoteController extends Controller
             $array = [
                 "title"         => $request['title'],
                 "description"   => $request['description'],
+                "type"          => $request['type']
             ];
             $grocery = $this->noteModel()->storeData( $array);
 
@@ -97,7 +99,8 @@ class NoteController extends Controller
      */
     public function update(Request $request, $id){
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string'
+            'title' => 'required|string',
+            'type' => 'required|in:NORMAL,EMERGENCY'
         ], config("message.validation_message"));
         if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
 
@@ -112,6 +115,7 @@ class NoteController extends Controller
             $array = [
                 "title"         => $request['title'],
                 "description"   => $request['description'],
+                "type"          => $request['type'],
             ];
             $this->noteModel()->updateData( $array, $details->id );
 

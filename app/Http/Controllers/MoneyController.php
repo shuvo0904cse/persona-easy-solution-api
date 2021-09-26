@@ -41,7 +41,7 @@ class MoneyController extends Controller
                 ]
             ];
         
-            $lists = $this->moneyModel()->lists($filterArray);
+            $lists = $this->moneyModel()->lists($filterArray, "*", ['category']);
             
             $array = [
                 "data"      => MoneyListResource::collection($lists->items()),

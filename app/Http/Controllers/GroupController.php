@@ -38,7 +38,7 @@ class GroupController extends Controller
                     "value"     => $request->search
                 ]
             ];
-            $lists = $this->groupModel()->lists($filterArray);
+            $lists = $this->groupModel()->lists($filterArray, "*", ["userGroceries"]);
 
             $array = [
                 "data"      => GroupListResource::collection($lists->items()),
@@ -46,6 +46,7 @@ class GroupController extends Controller
             ];
             return $this->message::successMessage("", $array);
         } catch (\Exception $e) {
+            return $e->getMessage().$e->getFile().$e->getLine();
             $this->log::error("lists-group", $e);
             return $this->message::errorMessage();
         }

@@ -41,7 +41,8 @@ return [
         'required' => 'The :attribute field is required.',
         'unique'   => 'This :attribute has already been used.',
         'in'       => 'The :attribute field not match.',
-        'regex'    => 'The :attribute field not correct format.'
+        'regex'    => 'The :attribute field not correct format.',
+        'email'    => 'Invalid email format'
     ]
 ];
 

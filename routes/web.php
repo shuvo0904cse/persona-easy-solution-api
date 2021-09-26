@@ -21,10 +21,12 @@ $router->group(['prefix' => 'api'], function () use ($router){
 
     $router->post('login', 'AuthController@login');
     $router->post('register', 'AuthController@register');
+    $router->get('verify/{token}', 'AuthController@VerifyEmail');
 
     $router->group(['middleware' => 'auth'], function () use ($router){
         //Category
         $router->get('category', 'CategoryController@category');
+        $router->get('category-lists', 'CategoryController@lists');
         $router->get('category-details-by-id/{id}', 'CategoryController@detailsById');
         $router->post('store-category', 'CategoryController@store');
         $router->put('update-category/{id}', 'CategoryController@update');
@@ -40,6 +42,7 @@ $router->group(['prefix' => 'api'], function () use ($router){
 
         //Grocery
         $router->get('grocery', 'GroceryController@grocery');
+        $router->get('grocery-lists', 'GroceryController@lists');
         $router->get('grocery-details-by-id/{id}', 'GroceryController@detailsById');
         $router->post('store-grocery', 'GroceryController@store');
         $router->put('update-grocery/{id}', 'GroceryController@update');
@@ -81,5 +84,10 @@ $router->group(['prefix' => 'api'], function () use ($router){
         $router->post('store-project-money', 'ProjectMoneyController@store');
         $router->put('update-project-money/{id}', 'ProjectMoneyController@update');
         $router->delete('delete-project-money/{id}', 'ProjectMoneyController@delete');
+
+        //Report
+        $router->get('report/money', 'ReportController@money');
+        $router->get('report/category', 'ReportController@category');
+    
     });
 });

@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('image')->nullable();
             $table->string('email')->unique()->index();
             $table->string('phone_number')->unique()->nullable();
+            $table->string('email_verification_token')->nullable();
             $table->dateTime('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('status',['PENDING', 'ACTIVE', 'BLOCK'])->default("PENDING");

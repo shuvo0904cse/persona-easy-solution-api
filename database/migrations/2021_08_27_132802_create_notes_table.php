@@ -18,6 +18,7 @@ class CreateNotesTable extends Migration
             $table->string('title')->index();
             $table->string('description')->nullable();
             $table->boolean('status')->default(false);
+            $table->enum('type', ['NORMAL', 'EMERGENCY'])->default('NORMAL');
             $table->uuid('created_by');
             $table->uuid('updated_by')->nullable();
             $table->uuid('deleted_by')->nullable();

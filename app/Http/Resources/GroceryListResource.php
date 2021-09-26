@@ -10,10 +10,18 @@ class GroceryListResource extends JsonResource
      * Transform the resource into an array.
      */
     public function toArray($request)
-    {
-        return [
+    {   
+        $array = [
             "id"            => $this['id'],
             "title"         => $this['title']
         ];
+        if(isset($this['pivot'])){
+            $newArray = [
+                "amount"        => $this['pivot']['amount'],
+                "unit"          => $this['pivot']['unit']
+            ];
+            $array = array_merge($array, $newArray);
+        }
+        return $array;
     }
 }

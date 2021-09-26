@@ -23,9 +23,12 @@ trait BaseModel
     /**
      * lists
      */
-    public function lists($requestData)
+    public function lists($requestData =[], $columns = "*", $releation = [])
     {
         $query = self::query();
+
+         //releation
+        $limit = !empty($releation) ? $query->with($releation) : null; 
 
         //limit
         $limit = isset($requestData['limit']) && !empty($requestData['limit']) ? $requestData['limit'] : 10; 
@@ -36,11 +39,14 @@ trait BaseModel
         //if filter exists
         if(isset($requestData['filter'])) $query = $query->ofFilter($requestData['filter']);
 
+        //order by
+        $query->orderBy("created_at", "DESC");
+        
         //if paginate
         if(isset($requestData['is_pagination']) && $requestData['is_pagination'] == true) return $query->paginate($limit);
 
         //if not paginate
-        return $query->get();
+        return $query->get($columns);
     }
 
     /**

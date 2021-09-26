@@ -48,7 +48,21 @@ class CategoryController extends Controller
             ];
             return $this->message::successMessage("", $array);
         } catch (\Exception $e) {
-            $this->log::error("lists-category", $e);
+            $this->log::error("category", $e);
+            return $this->message::errorMessage();
+        }
+    }
+
+     /**
+     * lists
+     */
+    public function lists()
+    {
+        try{
+            $lists = $this->categoryModel()->lists(null, ['id', 'title', 'type']);
+            return $this->message::successMessage("", $lists);
+        } catch (\Exception $e) {
+            $this->log::error("lists", $e);
             return $this->message::errorMessage();
         }
     }

@@ -44,7 +44,21 @@ class GroceryController extends Controller
             ];
             return $this->message::successMessage("", $array);
         } catch (\Exception $e) {
-            $this->log::error("lists-grocery", $e);
+            $this->log::error("grocery", $e);
+            return $this->message::errorMessage();
+        }
+    }
+
+     /**
+     * lists
+     */
+    public function lists()
+    {
+        try{
+            $lists = $this->groceryModel()->lists(null, ['id', 'title']);
+            return $this->message::successMessage("", $lists);
+        } catch (\Exception $e) {
+            $this->log::error("lists", $e);
             return $this->message::errorMessage();
         }
     }

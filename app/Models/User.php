@@ -25,6 +25,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'image',
         'email',
         'phone_number',
+        'email_verification_token',
         'status',
         'password'
     ];
@@ -36,6 +37,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     protected $hidden = [
         'password',
+        'email_verification_token'
     ];
 
     /**
