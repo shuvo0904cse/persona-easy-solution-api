@@ -27,6 +27,9 @@ $router->group(['prefix' => 'api'], function () use ($router){
     $router->post('change-password', 'AuthController@changePassword');
 
     $router->group(['middleware' => 'auth'], function () use ($router){
+        //Dashboard
+        $router->get('dashboard', 'DashboardController@dashboard');
+
         //Category
         $router->get('category', 'CategoryController@category');
         $router->get('category-lists', 'CategoryController@lists');

@@ -1,6 +1,7 @@
 <?php
 namespace App\Helpers;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
 
 class UtilsHelper
@@ -259,5 +260,26 @@ class UtilsHelper
             "next_page_url"     => $list->nextPageUrl(),
             "prev_page_url"     => $list->previousPageUrl()
         ];
+    }
+
+    /**
+     * Get Current Month Name
+    */
+    public static function getCurrentMonthName(){
+        return Carbon::now()->format('M');
+    }
+
+     /**
+     * Get Current Month
+    */
+    public static function getCurrentMonth(){
+        return date("m");
+    }
+
+     /**
+     * Get Current Year
+    */
+    public static function getCurrentYear(){
+        return date("Y");
     }
 }
