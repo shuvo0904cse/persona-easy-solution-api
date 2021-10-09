@@ -50,6 +50,18 @@ trait BaseModel
     }
 
     /**
+     * Details with multiple
+     */
+    public function detailsWithMultiple($query)
+    {
+        $query = self::query();
+
+        $query = $query->where($query);
+
+        return $query->first();
+    }
+
+    /**
      * Details
      */
     public function details($columnValue, $columnName = "id", $withTrashed = false, $releations=[])

@@ -21,7 +21,10 @@ $router->group(['prefix' => 'api'], function () use ($router){
 
     $router->post('login', 'AuthController@login');
     $router->post('register', 'AuthController@register');
-    $router->get('verify/{token}', 'AuthController@VerifyEmail');
+    $router->post('verify-user', 'AuthController@verifyUser');
+    $router->post('forgot-password', 'AuthController@forgotPassword');
+    $router->post('reset-password', 'AuthController@resetPassword');
+    $router->post('change-password', 'AuthController@changePassword');
 
     $router->group(['middleware' => 'auth'], function () use ($router){
         //Category
