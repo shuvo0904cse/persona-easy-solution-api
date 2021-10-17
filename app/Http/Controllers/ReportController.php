@@ -104,65 +104,93 @@ class ReportController extends Controller
 
      /**
      * category
-     * 
-     * Reports Params
-     * 
-     * ?from=2021-09-08&to=2021-09-14&group_by=type
-     * 
      */
     public function category(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'group_by' => 'in:id,type'
-        ], config("message.validation_message"));
-
-        if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
-
         try{
             //request
             $formDate = $request->from;
             $toDate = $request->to;
-            $groupBy = $request->group_by;
-                        
-            $money = Category::query()->join("money", "money.category_id", "=", "categories.id");
+            $categories = $request->categories;
 
-            if($groupBy == "id") {
-                $money = $money->select(
-                    'categories.id as category_id',
-                    'categories.title as category_title',
-                    'categories.type as category_type',
-                    DB::raw('sum(money.amount) as total')
-                )->groupBy("categories.id");
-            }
+            $category = Category::query()
+                        ->join("money", "money.category_id", "=", "categories.id")
+                        ->select(
+                            'categories.id as category_id',
+                            'categories.title as category_title',
+                            'categories.type as category_type',
+                            DB::raw('sum(money.amount) as total')
+                        )->groupBy("categories.id");
 
-            if($groupBy == "type") {
-                $money = $money->select(
-                    'categories.type as category_type',
-                    DB::raw('sum(money.amount) as total')
-                )->groupBy("categories.type");
-            }
+            if(!empty($categories)) $category = $category->whereIn("money.category_id", explode(",", $categories));
 
-            if(!empty($formDate)){
-                $money = $money->select(
-                    'categories.id as category_id',
-                    'categories.title as category_title',
-                    'categories.type as category_type',
-                    DB::raw('sum(money.amount) as total')
-                );
-            }
-
-            if(!empty($formDate) && !empty($toDate)){
-                $money = $money->whereBetween('money.created_at', [$formDate, $toDate]);
-            }
+            if(!empty($formDate) && !empty($toDate)) $category = $category->whereBetween('money.created_at', [$formDate, $toDate]);
     
-            $money = $money->orderBy("categories.created_at", "DESC")->get();
+            $category = $category->orderBy("total", "DESC")->get();
             
-            return $this->message::successMessage("", $money);
+            return $this->message::successMessage("", $category);
         } catch (\Exception $e) {
+
+            dd($e->getMessage());
             $this->log::error("category", $e);
             return $this->message::errorMessage();
         }
     }
+
+
+    // public function category(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'group_by' => 'in:id,type'
+    //     ], config("message.validation_message"));
+
+    //     if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
+
+    //     try{
+    //         //request
+    //         $formDate = $request->from;
+    //         $toDate = $request->to;
+    //         $groupBy = $request->group_by;
+                        
+    //         $money = Category::query()->join("money", "money.category_id", "=", "categories.id");
+
+    //         if($groupBy == "id") {
+    //             $money = $money->select(
+    //                 'categories.id as category_id',
+    //                 'categories.title as category_title',
+    //                 'categories.type as category_type',
+    //                 DB::raw('sum(money.amount) as total')
+    //             )->groupBy("categories.id");
+    //         }
+
+    //         if($groupBy == "type") {
+    //             $money = $money->select(
+    //                 'categories.type as category_type',
+    //                 DB::raw('sum(money.amount) as total')
+    //             )->groupBy("categories.type");
+    //         }
+
+    //         if(!empty($formDate)){
+    //             $money = $money->select(
+    //                 'categories.id as category_id',
+    //                 'categories.title as category_title',
+    //                 'categories.type as category_type',
+    //                 DB::raw('sum(money.amount) as total')
+    //             );
+    //         }
+
+    //         if(!empty($formDate) && !empty($toDate)){
+    //             $money = $money->whereBetween('money.created_at', [$formDate, $toDate]);
+    //         }
+    
+    //         $money = $money->orderBy("categories.created_at", "DESC")->get();
+            
+    //         return $this->message::successMessage("", $money);
+    //     } catch (\Exception $e) {
+    //         $this->log::error("category", $e);
+    //         return $this->message::errorMessage();
+    //     }
+    // }
 
     
 }

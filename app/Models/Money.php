@@ -51,7 +51,7 @@ class Money extends Model
     /**
      * Get last ten transactions
      */
-    public function getLastTransactions($limit = "10")
+    public function getLastTransactions($limit = "20")
     {
         return DB::table('money')
                ->join('categories', 'money.category_id', '=', 'categories.id')
