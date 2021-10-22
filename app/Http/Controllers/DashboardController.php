@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\LogHelper;
 use App\Helpers\MessageHelper;
 use App\Helpers\UtilsHelper;
-use App\Models\Category;
 use App\Models\Money;
-use App\Services\GenerateDefaultCategoryService;
-use Faker\Provider\bn_BD\Utils;
 
 class DashboardController extends Controller
 {
@@ -29,14 +26,14 @@ class DashboardController extends Controller
         try{
             $array = [
                 "current_month"         => UtilsHelper::getCurrentMonthName(),
-                "current_year"         => UtilsHelper::getCurrentYear(),
+                "current_year"          => UtilsHelper::getCurrentYear(),
                 "current_month_income"  => $this->moneyModel()->getTotalIncomeOrExpense("INCOME", UtilsHelper::getCurrentMonth()),
                 "current_month_expense" => $this->moneyModel()->getTotalIncomeOrExpense("EXPENSE", UtilsHelper::getCurrentMonth()),
-                "current_year_income"  => $this->moneyModel()->getTotalIncomeOrExpense("INCOME", "", UtilsHelper::getCurrentYear()),
-                "current_year_expense" => $this->moneyModel()->getTotalIncomeOrExpense("EXPENSE", "", UtilsHelper::getCurrentYear()),
+                "current_year_income"   => $this->moneyModel()->getTotalIncomeOrExpense("INCOME", "", UtilsHelper::getCurrentYear()),
+                "current_year_expense"  => $this->moneyModel()->getTotalIncomeOrExpense("EXPENSE", "", UtilsHelper::getCurrentYear()),
                 "total_income"          => $this->moneyModel()->getTotalIncomeOrExpense("INCOME"),
                 "total_expense"         => $this->moneyModel()->getTotalIncomeOrExpense("EXPENSE"),
-                "last_transactions"  => $this->moneyModel()->getLastTransactions()
+                "last_transactions"     => $this->moneyModel()->getLastTransactions()
             ];
             
             return $this->message::successMessage("", $array);
@@ -48,9 +45,5 @@ class DashboardController extends Controller
 
     private function moneyModel(){
         return new Money();
-    }
-
-    private function generateDefaultCategoryService(){
-        return new GenerateDefaultCategoryService();
     }
 }

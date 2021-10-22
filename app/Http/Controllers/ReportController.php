@@ -24,14 +24,6 @@ class ReportController extends Controller
 
      /**
      * Money
-     * 
-     * Reports Params
-     * 
-     * ?group_by=year&year=2021
-     * ?type=EXPENSE&from=2021-08-15&to=2021-09-14
-     * ?from=2021-08-15&to=2021-09-14
-     * ?category=38a209e7-7620-4692-b09a-3ffa2fc05618,949560b1-a4d9-429a-83bf-92b018846cb5&from=2021-08-15&to=2021-09-14
-     * 
      */
     public function money(Request $request)
     {
@@ -112,6 +104,7 @@ class ReportController extends Controller
             $formDate = $request->from;
             $toDate = $request->to;
             $categories = $request->categories;
+            $categoryType = $request->category_type;
 
             $category = Category::query()
                         ->join("money", "money.category_id", "=", "categories.id")
@@ -121,76 +114,21 @@ class ReportController extends Controller
                             'categories.type as category_type',
                             DB::raw('sum(money.amount) as total')
                         )->groupBy("categories.id");
-
+            //category type
+            if(!empty($categoryType)) $category = $category->where("categories.type", $categoryType);
+            
+            //categories
             if(!empty($categories)) $category = $category->whereIn("money.category_id", explode(",", $categories));
-
+            
+            //from date - to date
             if(!empty($formDate) && !empty($toDate)) $category = $category->whereBetween('money.created_at', [$formDate, $toDate]);
     
             $category = $category->orderBy("total", "DESC")->get();
             
             return $this->message::successMessage("", $category);
         } catch (\Exception $e) {
-
-            dd($e->getMessage());
             $this->log::error("category", $e);
             return $this->message::errorMessage();
         }
-    }
-
-
-    // public function category(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'group_by' => 'in:id,type'
-    //     ], config("message.validation_message"));
-
-    //     if ($validator->fails()) return $this->message::validationErrorMessage("", $validator->errors());
-
-    //     try{
-    //         //request
-    //         $formDate = $request->from;
-    //         $toDate = $request->to;
-    //         $groupBy = $request->group_by;
-                        
-    //         $money = Category::query()->join("money", "money.category_id", "=", "categories.id");
-
-    //         if($groupBy == "id") {
-    //             $money = $money->select(
-    //                 'categories.id as category_id',
-    //                 'categories.title as category_title',
-    //                 'categories.type as category_type',
-    //                 DB::raw('sum(money.amount) as total')
-    //             )->groupBy("categories.id");
-    //         }
-
-    //         if($groupBy == "type") {
-    //             $money = $money->select(
-    //                 'categories.type as category_type',
-    //                 DB::raw('sum(money.amount) as total')
-    //             )->groupBy("categories.type");
-    //         }
-
-    //         if(!empty($formDate)){
-    //             $money = $money->select(
-    //                 'categories.id as category_id',
-    //                 'categories.title as category_title',
-    //                 'categories.type as category_type',
-    //                 DB::raw('sum(money.amount) as total')
-    //             );
-    //         }
-
-    //         if(!empty($formDate) && !empty($toDate)){
-    //             $money = $money->whereBetween('money.created_at', [$formDate, $toDate]);
-    //         }
-    
-    //         $money = $money->orderBy("categories.created_at", "DESC")->get();
-            
-    //         return $this->message::successMessage("", $money);
-    //     } catch (\Exception $e) {
-    //         $this->log::error("category", $e);
-    //         return $this->message::errorMessage();
-    //     }
-    // }
-
-    
+    }  
 }
